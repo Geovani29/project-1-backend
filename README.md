@@ -34,7 +34,7 @@ npm install
 
 ### 3. Configurar variables de entorno
 
-Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
+Copia el archivo de ejemplo y crea tu `.env`:
 
 ```env
 # Configuración de Base de Datos
@@ -153,7 +153,9 @@ Esta interfaz te permite probar todos los endpoints directamente desde el navega
 - `usuario_id`: FK → Usuario
 - `libro_id`: FK → Libro
 - `fecha_reserva`: Date
-- `fecha_entrega`: Date
+- `fecha_entrega_prevista`: Date (fecha prevista de entrega; debe ser futura al crear la reserva)
+- `fecha_entrega_real`: Date (fecha real de devolución; nulo hasta que se devuelva)
+- `estado`: Enum (`activa`, `devuelta`, `vencida`)
 
 ## Roles y Permisos
 
@@ -277,16 +279,7 @@ GET /libros?genero=Ficción&autor=García&nombre=Cien&disponible=true&page=1&lim
 ```json
 {
   "data": [
-    {
-      "id": 1,
-      "titulo": "Cien años de soledad",
-      "autor": "Gabriel García Márquez",
-      "genero": "Ficción",
-      "fecha_publicacion": "1967-05-30",
-      "casa_editorial": "Sudamericana",
-      "disponible": true,
-      "activo": true
-    }
+    { "titulo": "Cien años de soledad" }
   ],
   "pagination": {
     "total": 50,
@@ -347,7 +340,7 @@ Content-Type: application/json
 
 {
   "libro_id": 1,
-  "fecha_entrega": "2024-12-31"
+  "fecha_entrega_prevista": "2024-12-31"
 }
 ```
 
@@ -430,69 +423,8 @@ curl -X POST http://localhost:3000/reservas \
   }'
 ```
 
-## Características Implementadas
+## Tests
 
-### Rúbrica Completa
-
-- [x] CREATE User (registro público)
-- [x] CREATE Libro + Autenticación
-- [x] READ User + Autenticación
-- [x] READ Libro (público)
-- [x] READ Libros + Filtros + Paginación
-- [x] UPDATE User + Autenticación
-- [x] UPDATE Libro + Autenticación
-- [x] DELETE (Soft Delete) en usuarios y libros
-- [x] Roles y permisos correctamente implementados
-- [x] Sin secretos expuestos (uso de .env)
-
-### Seguridad
-
-- Contraseñas encriptadas con bcrypt
-- Autenticación JWT
-- Middleware de verificación de permisos
-- Validación de datos de entrada
-- Protección contra correos duplicados
-- Soft delete para mantener integridad de datos
-
-### Funcionalidades Adicionales
-
-- Sistema de reservas completo
-- Gestión automática de disponibilidad de libros
-- Paginación eficiente
-- Filtros múltiples para búsqueda de libros
-- Relaciones entre modelos (Usuario-Reserva-Libro)
-- Respuestas consistentes con mensajes en español
-
-## Solución de Problemas
-
-### Error de conexión a PostgreSQL
-Verifica que:
-- PostgreSQL esté ejecutándose
-- Las credenciales en `.env` sean correctas
-- La base de datos `biblioteca_digital` exista
-
-### Error "Token inválido"
-- Verifica que el token esté en el formato: `Bearer {token}`
-- El token podría haber expirado (duración: 24h)
-- Haz login nuevamente para obtener un nuevo token
-
-### Error de permisos
-- Verifica que tu usuario tenga los permisos necesarios
-- Los permisos se asignan automáticamente según el rol
-- Un admin puede modificar permisos con el endpoint `/usuarios/:id/permisos`
-
-## Notas de Desarrollo
-
-- Los registros "eliminados" se marcan como `activo: false` (soft delete)
-- Los endpoints GET excluyen automáticamente los registros inactivos
-- La paginación tiene un límite máximo de 100 elementos por página
-- Los filtros de búsqueda no distinguen entre mayúsculas y minúsculas
-- Las reservas marcan automáticamente los libros como no disponibles
-
-## Autor
-
-Proyecto desarrollado como trabajo individual para el curso de Desarrollo Web Backend.
-
-## Licencia
-
-ISC
+```bash
+npm test
+```
